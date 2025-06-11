@@ -1,0 +1,44 @@
+{
+  description = "A development environment as a Nix Flake";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+  };
+
+  outputs =
+    { self, nixpkgs, ... }:
+    let
+      system = "x86_64-linux";
+    in
+    {
+      devShells."${system}".default =
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+          };
+        in
+        pkgs.mkShell {
+          packages = with pkgs; [
+{% if use_github_workflow -%}
+            act
+{%- endif %}
+{% if use_commitizen -%}
+            commitizen
+{%- endif %}
+            entr
+            just
+{% if use_just -%}
+            poetry
+{%- endif %}
+{% if use_pre_commit -%}
+            pre-commit
+{%- endif %}
+            (python3.withPackages ( ps: with ps; [ ]))
+          ];
+
+          shellHook = ''
+            echo "Starting development environment..."
+          '';
+        };
+    };
+}

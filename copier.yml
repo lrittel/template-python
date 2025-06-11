@@ -1,0 +1,87 @@
+available_python_versions:
+  type: json
+  default:
+    - "3.0"
+    - "3.1"
+    - "3.2"
+    - "3.3"
+    - "3.4"
+    - "3.5"
+    - "3.6"
+    - "3.7"
+    - "3.8"
+    - "3.9"
+    - "3.10"
+    - "3.11"
+    - "3.12"
+    - "3.13"
+  when: false
+
+project_name:
+  type: str
+  help: How is the project called? This has to be a valid Python module name.
+  validator: |-
+    {% if not (project_name | regex_search('^[A-Za-z][-_A-Za-z0-9]*[A-Za-z0-9]')) -%}
+    The project name contains invalid characters.
+    {%- endif %}
+
+root_module_name:
+  type: str
+  help: What is the name of the root module?
+  default: "{{ project_name | replace('-', '_')}}"
+  validator: |-
+    {% if not (root_module_name | regex_search('^[A-Za-z][_A-Za-z0-9]*[A-Za-z0-9]')) -%}
+    The root_module_name contains invalid characters.
+    {%- endif %}
+
+description:
+  type: str
+  help: "Enter a short description of what the project does:"
+  default: ""
+
+use_pre_commit:
+  type: bool
+  help: Do you want to set up a pre-commit configuration?
+  default: true
+
+use_commitizen:
+  type: bool
+  help: Do you want to set up a commitizen configuration?
+  default: true
+
+use_mkdocs:
+  type: bool
+  help: Do you want to generate documentation via mkdocs?
+  default: true
+
+use_github_workflow:
+  type: bool
+  help: Do you want to generate GitHub Workflows?
+  default: true
+
+use_nix_flake:
+  type: bool
+  help: Do you want to generate a flake.nix for the project?
+  default: true
+
+# # TODO: implement
+# use_dockerfile:
+#   type: bool
+#   help: Do you want to generate a Dockerfile for the project?
+#   default: true
+
+use_just:
+  type: bool
+  help: Do you want to use Just as a task runner?
+  default: true
+
+use_py_click:
+  type: bool
+  help: Do you want to generate a CLI using Click?
+  default: true
+
+min_python_version:
+  type: str
+  help: What is the minimum Python version you want to support?
+  choices: "{{ available_python_versions }}"
+  default: "{{ available_python_versions[-1] }}"
