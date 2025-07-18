@@ -85,3 +85,5 @@ min_python_version:
   help: What is the minimum Python version you want to support?
   choices: "{{ available_python_versions }}"
   default: "{{ available_python_versions[-1] }}"
+
+_subdirectory: "template"
