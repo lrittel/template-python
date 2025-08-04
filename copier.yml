@@ -39,6 +39,14 @@ description:
   help: "Enter a short description of what the project does:"
   default: ""
 
+package_manager:
+  type: str
+  help: Which package manager would you like to use?
+  choices:
+    - uv
+    - poetry
+  default: uv
+
 use_pre_commit:
   type: bool
   help: Do you want to set up a pre-commit configuration?

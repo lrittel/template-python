@@ -26,8 +26,12 @@
             commitizen
 {%- endif %}
             entr
-            just
 {% if use_just -%}
+            just
+{%- endif %}
+{% if package_manager == 'uv' -%}
+            uv
+{% elif package_manager == 'poetry' -%}
             poetry
 {%- endif %}
 {% if use_pre_commit -%}
