@@ -1,17 +1,29 @@
 # Build the documentation.
 [group('docs')]
 build-docs:
+{%- if package_manager == 'uv' +%}
+    uv run mkdocs build
+{%- elif package_manager == 'poetry' +%}
     poetry run mkdocs build
+{%- endif %}
 
 # Serves the documentation on a local webserver.
 [group('docs')]
 serve-docs:
+{%- if package_manager == 'uv' +%}
+    uv run mkdocs serve --watch ./src
+{%- elif package_manager == 'poetry' +%}
     poetry run mkdocs serve --watch ./src
+{%- endif %}
 
 # Runs the full test suite.
 [group('tests')]
 run-tests *PYTEST_FLAGS:
+{%- if package_manager == 'uv' +%}
+    uv run pytest {{ PYTEST_FLAGS }}
+{%- elif package_manager == 'poetry' +%}
     poetry run pytest {{ PYTEST_FLAGS }}
+{%- endif %}
 
 # Runs the full test suite whenever a file changes.
 [group('tests')]
@@ -29,11 +41,19 @@ watch-tests *PYTEST_FLAGS:
 # Run the pre-commit hook manually.
 [group('ci')]
 run-pre-commit:
+{%- if package_manager == 'uv' +%}
+    uv run pre-commit run
+{%- elif package_manager == 'poetry' +%}
     poetry run pre-commit run
+{%- endif %}
 
 # Run the pre-commit hook manually on all files.
 run-pre-commit-all:
+{%- if package_manager == 'uv' +%}
+    uv run pre-commit run --all
+{%- elif package_manager == 'poetry' +%}
     poetry run pre-commit run --all
+{%- endif %}
 
 # Run the GitHub Actions workflows locally.
 [group('ci')]

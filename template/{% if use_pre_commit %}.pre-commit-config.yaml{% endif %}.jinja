@@ -43,11 +43,18 @@ repos:
       - id: check-xml
       - id: check-yaml
 
+{% if package_manager == 'uv' %}
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.3
+    hooks:
+      - id: uv-lock
+{% elif package_manager == 'poetry' %}
   - repo: https://github.com/python-poetry/poetry
     rev: '2.1.3'
     hooks:
     - id: poetry-check
     - id: poetry-lock
+{% endif %}
 
   # Use the version installed by poetry to have consistent versions between
   # manual, CI and pre-commit use.
