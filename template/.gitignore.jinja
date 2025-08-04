@@ -38,3 +38,12 @@ cover/
 
 # Generated documentation
 /site/
+
+{% if use_direnv -%}
+# direnv
+/.direnv/
+{%- endif %}
+
+{#
+vim: syntax=gitignore.jinja
+#}

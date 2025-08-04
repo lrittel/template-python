@@ -83,6 +83,11 @@ use_just:
   help: Do you want to use Just as a task runner?
   default: true
 
+use_direnv:
+  type: bool
+  help: Do you want to set up environments automatically using direnv?
+  default: true
+
 use_py_click:
   type: bool
   help: Do you want to generate a CLI using Click?
