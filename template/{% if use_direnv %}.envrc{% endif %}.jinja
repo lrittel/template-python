@@ -1,0 +1,12 @@
+# load .env from the current directory
+dotenv_if_exists
+watch_file .env
+
+{% if use_nix_flake -%}
+use flake
+watch_file flake.nix flake.lock
+{% endif -%}
+
+{#
+vim: syntax=sh.jinja
+#}
