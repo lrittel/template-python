@@ -3,14 +3,93 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+
+{% if package_manager == 'uv' +%}
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+{% endif %}
   };
 
   outputs =
-    { self, nixpkgs, ... }:
+    {
+      self, 
+      nixpkgs, 
+{%- if package_manager == 'uv' +%}
+      pyproject-nix,
+      uv2nix,
+      pyproject-build-systems,
+{% endif %}
+      ... 
+    }:
     let
       system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+{% if package_manager == 'uv' +%}
+      inherit (nixpkgs) lib;
+      inherit (pkgs.callPackages pyproject-nix.build.util { }) mkApplication;
+
+      workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
+
+      overlay = workspace.mkPyprojectOverlay {
+        sourcePreference = "wheel";
+      };
+
+      # See:
+      # - https://pyproject-nix.github.io/uv2nix/FAQ.html
+      pyprojectOverrides = _final: _prev: {
+        # Implement build fixups here.
+        # Note that uv2nix is _not_ using Nixpkgs buildPythonPackage.
+        # It's using https://pyproject-nix.github.io/pyproject.nix/build.html
+      };
+{% endif %}
+
+      python = pkgs.python{{ min_python_version.split('.') | join("") }};
+{% if package_manager == 'uv' +%}
+      # Construct package set
+      pythonSet =
+        # Use base package set from pyproject.nix builders
+        (pkgs.callPackage pyproject-nix.build.packages {
+          inherit python;
+        }).overrideScope
+          (
+            lib.composeManyExtensions [
+              pyproject-build-systems.overlays.default
+              overlay
+              pyprojectOverrides
+            ]
+          );
+{% endif %}
     in
     {
+{%- if package_manager == 'uv' +%}
+      packages.${system}.default = mkApplication {
+        venv = pythonSet.mkVirtualEnv "{{ project_name }}-out-env" workspace.deps.default;
+        package = pythonSet.{{ project_name }};
+      };
+
+      apps.${system}.default = {
+        type = "app";
+        program = "${self.packages.${system}.default}/bin/{{ project_name }}";
+      };
+
+      overlays.default = final: prev: { sway-out = self.packages.${system}.default; };
+{%- endif %}
+
       devShells."${system}".default =
         let
           pkgs = import nixpkgs {
@@ -18,31 +97,52 @@
           };
         in
         pkgs.mkShell {
-          packages = with pkgs; [
-{% if use_github_workflow -%}
+          packages = (with pkgs; [
+{%- if use_github_workflow +%}
             act
 {%- endif %}
-{% if use_commitizen -%}
+{%- if use_commitizen +%}
             commitizen
 {%- endif %}
             entr
-{% if use_just -%}
+{%- if use_just +%}
             just
 {%- endif %}
-{% if package_manager == 'uv' -%}
+{%- if package_manager == 'uv' +%}
             uv
-{% elif package_manager == 'poetry' -%}
+{%- elif package_manager == 'poetry' +%}
             poetry
 {%- endif %}
-{% if use_pre_commit -%}
+{%- if use_pre_commit +%}
             pre-commit
 {%- endif %}
-            (python3.withPackages ( ps: with ps; [ ]))
-          ];
+          ]) ++ [ python ];
+
+{%- if package_manager == 'uv' +%}
+
+          env = {
+            # Prevent uv from managing Python downloads
+            UV_PYTHON_DOWNLOADS = "never";
+            # Force uv to use nixpkgs Python interpreter
+            UV_PYTHON = python.interpreter;
+          }
+          // lib.optionalAttrs pkgs.stdenv.isLinux {
+            # Python libraries often load native shared objects using dlopen(3).
+            # Setting LD_LIBRARY_PATH makes the dynamic library loader aware of libraries without using RPATH for lookup.
+            LD_LIBRARY_PATH = lib.makeLibraryPath pkgs.pythonManylinuxPackages.manylinux1;
+          };
+{%- endif %}
 
           shellHook = ''
+{%- if package_manager == 'uv' +%}
+            unset PYTHONPATH
+{%- endif %}
             echo "Starting development environment..."
           '';
         };
     };
 }
+
+{#
+vim: syntax=nix.jinja:ts=2:sw=2:et
+#}
