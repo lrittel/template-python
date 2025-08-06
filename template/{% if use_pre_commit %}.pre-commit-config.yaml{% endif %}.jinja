@@ -62,13 +62,21 @@ repos:
     hooks:
       - id: black
         name: black
+{% if package_manager == 'uv' %}
+        entry: uv run black
+{% elif package_manager == 'poetry' %}
         entry: poetry run black
+{% endif %}
         language: system
         types: [python]
 
       - id: isort
         name: isort
+{% if package_manager == 'uv' %}
+        entry: uv run isort
+{% elif package_manager == 'poetry' %}
         entry: poetry run isort
+{% endif %}
         language: system
         types: [python]
 
