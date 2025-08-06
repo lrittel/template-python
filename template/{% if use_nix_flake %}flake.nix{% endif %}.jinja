@@ -23,6 +23,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 {% endif %}
+
+{% if use_github_workflow +%}
+    nix-github-actions = {
+      url = "github:nix-community/nix-github-actions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+{%- endif %}
   };
 
   outputs =
@@ -33,6 +40,9 @@
       pyproject-nix,
       uv2nix,
       pyproject-build-systems,
+{% endif %}
+{%- if use_github_workflow +%}
+    nix-github-actions,
 {% endif %}
       ... 
     }:
@@ -140,6 +150,10 @@
             echo "Starting development environment..."
           '';
         };
+
+{%- if use_github_workflow +%}
+      githubActions = nix-github-actions.lib.mkGithubMatrix { checks = self.packages; };
+{%- endif %}
     };
 }
 
