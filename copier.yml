@@ -104,3 +104,13 @@ _subdirectory: "template"
 _tasks:
   - command: ["git", "init", "--initial-branch=main"]
     when: "{{ _copier_operation }} == 'copy' }}"
+  # The pre-commit hook will likely fail. But we run the command for the fixups
+  # anyways. Add || true to make sure that the copier operation does not fail
+  # when pre-commit reformats files.
+  - command: |
+      {% if use_nix %}
+      nix develop -c "just run-pre-commit-all || true"
+      {% else %}
+      bash -c "just run-pre-commit-all || true"
+      {% endif %}
+    when: "{{ use_just and _copier_operation }} in ['copy', 'update'] }}"
