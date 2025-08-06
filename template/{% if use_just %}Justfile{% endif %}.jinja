@@ -55,10 +55,12 @@ run-pre-commit-all:
     poetry run pre-commit run --all
 {%- endif %}
 
+{%- if use_github_workflow +%}
 # Run the GitHub Actions workflows locally.
 [group('ci')]
 run-workflows:
     act
+{%- endif %}
 {#
 vim: syntax=just
 #}
