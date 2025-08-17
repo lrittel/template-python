@@ -97,7 +97,7 @@
         program = "${self.packages.${system}.default}/bin/{{ project_name }}";
       };
 
-      overlays.default = final: prev: { sway-out = self.packages.${system}.default; };
+      overlays.default = final: prev: { {{ project_name }} = self.packages.${system}.default; };
 {%- endif %}
 
       devShells."${system}".default =
