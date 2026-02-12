@@ -1,3 +1,4 @@
+{% if use_py_click -%}
 import click
 
 
@@ -21,6 +22,10 @@ def main(ctx: click.Context):
 @click.pass_context
 def main_foo(ctx, flag_a, flag_b, flag_c, arg_a, arg_b):
     print(ctx.obj)
+{%- else -%}
+def main():
+    print("Hello world!")
+{%- endif %}
 
 
 if __name__ == "__main__":
