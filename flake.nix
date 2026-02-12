@@ -27,6 +27,7 @@
         pkgs: with pkgs; [
           copier
           uv
+          just
         ];
     in
     {

@@ -94,15 +94,23 @@ min_python_version:
 _subdirectory: "template"
 
 _tasks:
-  - command: ["git", "init", "--initial-branch=main"]
+  - command: |
+      git init --initial-branch=main
     when: "{{ _copier_operation }} == 'copy' }}"
   # The pre-commit hook will likely fail. But we run the command for the fixups
   # anyways. Add || true to make sure that the copier operation does not fail
   # when pre-commit reformats files.
+  # Add files again to include the formatting changes done by pre-commit.
   - command: |
       {% if use_nix %}
-      nix develop -c "just run-pre-commit-all || true"
+        {% if use_pre_commit %}
+          nix develop -c "just run-pre-commit-all || true"
+        {% endif %}
       {% else %}
-      bash -c "just run-pre-commit-all || true"
+        {% if use_pre_commit %}
+          git add .
+          bash -c "just run-pre-commit-all || true"
+        {% endif %}
       {% endif %}
+      git add .
     when: "{{ use_just and _copier_operation }} in ['copy', 'update'] }}"

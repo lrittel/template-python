@@ -8,10 +8,17 @@ build-docs:
 serve-docs:
     uv run mkdocs serve --watch ./src
 
+# Runs the main application with the given arguments.
+[group('app')]
+[positional-arguments]
+run-app *ARGS:
+    uv run "{{ project_name }}" "$@"
+
 # Runs the full test suite.
 [group('tests')]
+[positional-arguments]
 run-tests *PYTEST_FLAGS:
-    uv run pytest {{ PYTEST_FLAGS }}
+    uv run pytest "$@"
 
 # Runs the full test suite whenever a file changes.
 [group('tests')]
@@ -32,6 +39,7 @@ run-pre-commit:
     uv run pre-commit run
 
 # Run the pre-commit hook manually on all files.
+[group('ci')]
 run-pre-commit-all:
     uv run pre-commit run --all
 
