@@ -11,7 +11,7 @@ create-test-projects: clean-test-projects
         --data description="Tests my template" \
         --data min_python_version='3.13' \
         --data project_name=all-features \
-        --data root_module_name=minimal_features \
+        --data root_module_name=all_features \
         --data use_commitizen=true \
         --data use_direnv=true \
         --data use_github_workflow=true \
