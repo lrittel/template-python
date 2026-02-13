@@ -41,9 +41,27 @@ run-test-project-tests:
     #!/usr/bin/env bash
 
     for p in test/* ; do
+        echo "+---------------------------------------"
+        echo "| Running tests in $p ..."
+        echo "+---------------------------------------"
         pushd "$p"
-        just run-tests
+        just --allow-missing run-tests
         popd
+        echo "----------------------------------------"
+    done
+
+[group("test")]
+run-test-project-docs:
+    #!/usr/bin/env bash
+
+    for p in test/* ; do
+        echo "+---------------------------------------"
+        echo "| Building documentation in $p ..."
+        echo "+---------------------------------------"
+        pushd "$p"
+        just --allow-missing build-docs
+        popd
+        echo "----------------------------------------"
     done
 
 [group("test")]
@@ -51,9 +69,13 @@ run-test-project-programs:
     #!/usr/bin/env bash
 
     for p in test/* ; do
+        echo "+---------------------------------------"
+        echo "| Running main in $p ..."
+        echo "+---------------------------------------"
         pushd "$p"
-        just run-app --help
+        just --allow-missing run-app --help
         popd
+        echo "----------------------------------------"
     done
 
 [group("test")]
@@ -61,4 +83,5 @@ run-tests: \
         clean-test-projects \
         create-test-projects \
         run-test-project-tests \
+        run-test-project-docs \
         run-test-project-programs
