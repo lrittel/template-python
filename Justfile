@@ -78,6 +78,17 @@ run-test-project-programs:
         echo "----------------------------------------"
     done
 
+    # Test some extra commands
+    p="test/all-features"
+    echo "+---------------------------------------"
+    echo "| Running extra commands in $p ..."
+    echo "+---------------------------------------"
+    pushd "$p"
+    just run-app foo --flag-a 1 --flag-b "/" --flag-c "c" 1 41 43
+    popd
+    echo "----------------------------------------"
+
+
 [group("test")]
 run-tests: \
         clean-test-projects \

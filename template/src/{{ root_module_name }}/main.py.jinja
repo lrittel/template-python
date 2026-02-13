@@ -1,18 +1,43 @@
 """Main module."""
 
 {% if use_py_click -%}
+import logging
+from dataclasses import dataclass
+
 import click
 
+logger = logging.getLogger(__name__)
+
+@dataclass
+class Settings:
+    number: int
+
+APP_NAME="{{ project_name }}"
+PACKAGE_NAME="{{ project_name }}"
+LOG_LEVEL_MAPPING = {
+    name.lower(): number for name, number in logging.getLevelNamesMapping().items()
+}
+
+pass_settings = click.make_pass_decorator(Settings, ensure=True)
 
 @click.group()
-@click.version_option(prog_name="{{ project_name }}", package_name="{{ project_name }}")
+@click.version_option(prog_name=APP_NAME, package_name=PACKAGE_NAME)
+@click.option(
+    "--log-level",
+    type=click.Choice(LOG_LEVEL_MAPPING.keys()),
+    default="info",
+    envvar="PARA_LOG_LEVEL",
+    help="Set the application-wide log level",
+)
 @click.pass_context
-def main(ctx: click.Context):
+def main(ctx: click.Context, log_level: str):
     """Main entry point."""
 
-    ctx.ensure_object({})
-    ctx.obj["SETTING"] = "value"
-    pass
+    logger.debug("Debug is enabled!")
+    logger.info("Info is enabled!")
+    logger.warning("Warning is enabled!")
+    logger.error("Error is enabled!")
+    ctx.obj = Settings(67)
 
 
 @main.command("foo")
@@ -23,9 +48,18 @@ def main(ctx: click.Context):
 )
 @click.argument("arg-a")
 @click.argument("arg-b", nargs=-1)
+@pass_settings
 @click.pass_context
-def main_foo(ctx, flag_a, flag_b, flag_c, arg_a, arg_b):
-    print(ctx.obj)
+def main_foo(ctx, settings: Settings, flag_a, flag_b, flag_c, arg_a, arg_b):
+    print(f"Settings  : {settings.number}")
+    print(f"Flag a    : {flag_a}")
+    print(f"Flag b    : {flag_b}")
+    print(f"Flag c    : {flag_c}")
+    print(f"Argument a: {arg_a}")
+    print(f"Argument b: {arg_b}")
+
+    if flag_a != 1:
+        ctx.fail("flag_a is not 1!")
 {%- else -%}
 def main():
     """Main entry point."""
