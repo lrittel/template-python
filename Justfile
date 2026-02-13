@@ -36,6 +36,21 @@ create-test-projects: clean-test-projects
         --data use_pre_commit=false \
         --data use_py_click=false
 
+    # Newest Python version supported.
+    copier copy . test/python-newest --trust \
+        --data description="Tests the newest Python version" \
+        --data min_python_version='3.14' \
+        --data project_name=python-newest \
+        --data root_module_name=python_newest \
+        --data use_commitizen=true \
+        --data use_direnv=true \
+        --data use_github_workflow=true \
+        --data use_just=true \
+        --data use_mkdocs=true \
+        --data use_nix_flake=true \
+        --data use_pre_commit=true \
+        --data use_py_click=true
+
 [group("test")]
 run-test-project-tests:
     #!/usr/bin/env bash

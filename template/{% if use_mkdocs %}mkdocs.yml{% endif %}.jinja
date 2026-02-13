@@ -13,8 +13,8 @@ plugins:
         python:
           inventories:
             - https://docs.python.org/3/objects.inv
-          # FIXME: `show_if_no_docstring` does not seem to work ...
-          show_if_no_docstring: false
+          options:
+              show_if_no_docstring: false
   - mermaid2
   - api-autonav:
       modules: ["src/{{ root_module_name }}"]
