@@ -1,3 +1,4 @@
+{%- if use_mkdocs -%}
 # Build the documentation.
 [group('docs')]
 build-docs:
@@ -32,6 +33,7 @@ watch-tests *PYTEST_FLAGS:
         fi
         sleep 0.5
     done
+{%- endif %}
 
 # Run the pre-commit hook manually.
 [group('ci')]

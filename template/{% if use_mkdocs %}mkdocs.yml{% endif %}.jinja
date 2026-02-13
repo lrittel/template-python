@@ -4,10 +4,27 @@ theme:
   name: "material"
   features:
     - content.code.copy
+    - navigation.indexes
 
 plugins:
   - autorefs
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          inventories:
+            - https://docs.python.org/3/objects.inv
+          # FIXME: `show_if_no_docstring` does not seem to work ...
+          show_if_no_docstring: false
+  - mermaid2
+  - api-autonav:
+      modules: ["src/{{ root_module_name }}"]
+      module_options: {}
+      nav_section_title: "Reference"
+      api_root_uri: "reference"
+      nav_item_prefix: "<code class='doc-symbol doc-symbol-nav doc-symbol-module'></code>"
+      exclude_private: true
+      show_full_namespace: false
+      on_implicit_namespace_package: "warn"
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -16,12 +33,14 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid_custom
 
 nav:
   - {{ project_name }}: index.md
-  - Reference: []
-    # - reference/{{ root_module_name }}.main.md
 {#
 vim: syntax=yaml
 #}
