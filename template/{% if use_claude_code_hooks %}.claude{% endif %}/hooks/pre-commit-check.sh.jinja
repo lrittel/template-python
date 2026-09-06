@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# PreToolUse hook (Bash): gates `git commit` on the full test{% if use_mypy %}+typecheck{% endif %}
+# suite passing. The Stop hook (stop-check.sh) only checks when there are
+# uncommitted changes, scoped for per-turn speed — this is the
+# unconditional full-suite check nothing should land without. Silent and
+# non-blocking for every other command.
+set -uo pipefail
+
+input="$(cat)"
+command="$(jq -r '.tool_input.command // empty' <<<"$input")"
+[[ "$command" =~ git[[:space:]]+commit([[:space:]]|$) ]] || exit 0
+
+cd "$CLAUDE_PROJECT_DIR"
+
+tests_output="$(just run-tests 2>&1)"
+tests_status=$?
+{% if use_mypy %}
+typecheck_output="$(just typecheck 2>&1)"
+typecheck_status=$?
+{% endif %}
+if [ "$tests_status" -ne 0 ]{% if use_mypy %} || [ "$typecheck_status" -ne 0 ]{% endif %}; then
+  reason=""
+  if [ "$tests_status" -ne 0 ]; then
+    reason="${reason}Tests failed (just run-tests):
+${tests_output}
+
+"
+  fi
+{%- if use_mypy %}
+  if [ "$typecheck_status" -ne 0 ]; then
+    reason="${reason}Typecheck failed (just typecheck):
+${typecheck_output}"
+  fi
+{%- endif %}
+  echo "Blocking commit — full suite failed:
+
+${reason}" >&2
+  exit 2
+fi
+
+exit 0

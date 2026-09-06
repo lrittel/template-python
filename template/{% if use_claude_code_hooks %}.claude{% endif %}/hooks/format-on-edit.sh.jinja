@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# PostToolUse hook (Write|Edit): formats the file that was just touched, so
+# formatting doesn't need a separate `just format` call, and pre-commit's own
+# formatters have nothing left to fix (no second commit attempt) when this
+# repo's pre-commit hook runs.
+set -euo pipefail
+
+input="$(cat)"
+file="$(jq -r '.tool_response.filePath // .tool_input.file_path // empty' <<<"$input")"
+[ -n "$file" ] && [ -f "$file" ] || exit 0
+
+cd "$CLAUDE_PROJECT_DIR"
+rel="${file#"$PWD"/}"
+
+case "$rel" in
+  *.py)
+    # --workers 1: black's default process pool needs a multiprocessing
+    # socket that sandboxed environments (e.g. Claude Code) may block.
+    uv run black --workers 1 -- "$rel" 2>/dev/null || true
+    uv run isort -- "$rel" 2>/dev/null || true
+    ;;
+esac
+
+# Mirrors pre-commit's end-of-file-fixer: collapse trailing blank lines to a
+# single newline. Covers files black/isort don't touch (Markdown, YAML,
+# TOML, the Justfile, etc.). Skips binary files and files already empty.
+if [ -s "$rel" ] && grep -qI '' -- "$rel" 2>/dev/null; then
+  content="$(cat -- "$rel")"
+  printf '%s\n' "$content" > "$rel"
+fi
+
+exit 0

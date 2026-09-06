@@ -88,6 +88,15 @@ use_mypy:
   help: Do you want to type-check with mypy?
   default: true
 
+use_claude_code_hooks:
+  type: bool
+  help: >-
+    Do you want Claude Code hooks set up (auto-format edited files, block
+    `git commit` until tests/typecheck pass, a fast per-turn test/typecheck
+    check)? Assumes use_just.
+  default: "{{ use_just }}"
+  when: "{{ use_just }}"
+
 min_python_version:
   type: str
   help: What is the minimum Python version you want to support?

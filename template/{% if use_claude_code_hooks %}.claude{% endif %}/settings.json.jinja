@@ -1,0 +1,68 @@
+{
+  "permissions": {
+    "allow": [
+{%- if use_mkdocs %}
+      "Bash(just build-docs)",
+      "Bash(just serve-docs)",
+{%- endif %}
+      "Bash(just run-pre-commit)",
+      "Bash(just run-pre-commit-all)",
+{%- if use_github_workflow %}
+      "Bash(just run-workflows)",
+{%- endif %}
+      "Bash(just run-app)",
+      "Bash(just run-app *)",
+      "Bash(just run-tests)",
+      "Bash(just run-tests *)",
+      "Bash(just watch-tests)",
+      "Bash(just watch-tests *)",
+      "Bash(just format)",
+      "Bash(just format-check)",
+{%- if use_ruff %}
+      "Bash(just lint)",
+{%- endif %}
+{%- if use_mypy %}
+      "Bash(just typecheck)",
+{%- endif %}
+      "Bash(just setup)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit-check.sh",
+            "timeout": 180,
+            "statusMessage": "Running full test{% if use_mypy %}/typecheck{% endif %} suite before commit..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/stop-check.sh",
+            "timeout": 180,
+            "statusMessage": "Running tests{% if use_mypy %}/typecheck{% endif %}..."
+          }
+        ]
+      }
+    ]
+  }
+}
