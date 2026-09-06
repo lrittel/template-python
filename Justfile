@@ -21,7 +21,8 @@ create-test-projects: clean-test-projects
         --data use_pre_commit=true \
         --data use_py_click=true \
         --data use_ruff=true \
-        --data use_mypy=true
+        --data use_mypy=true \
+        --data use_claude_code_hooks=true
 
     # No optional features enabled.
     copier copy . test/minimal-features --trust \
@@ -38,7 +39,8 @@ create-test-projects: clean-test-projects
         --data use_pre_commit=false \
         --data use_py_click=false \
         --data use_ruff=false \
-        --data use_mypy=false
+        --data use_mypy=false \
+        --data use_claude_code_hooks=false
 
     # Newest Python version supported.
     copier copy . test/python-newest --trust \
@@ -55,7 +57,8 @@ create-test-projects: clean-test-projects
         --data use_pre_commit=true \
         --data use_py_click=true \
         --data use_ruff=true \
-        --data use_mypy=true
+        --data use_mypy=true \
+        --data use_claude_code_hooks=true
 
     # Oldest Python version supported.
     copier copy . test/python-oldest --trust \
@@ -72,7 +75,8 @@ create-test-projects: clean-test-projects
         --data use_pre_commit=true \
         --data use_py_click=true \
         --data use_ruff=true \
-        --data use_mypy=true
+        --data use_mypy=true \
+        --data use_claude_code_hooks=true
 
 [group("test")]
 run-test-project-tests:

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Stop hook: fast per-turn signal. Only runs when src/ or tests/ has an
+# uncommitted change since HEAD — the unconditional full check runs as a
+# hard gate before `git commit` instead (see pre-commit-check.sh).
+set -uo pipefail
+
+cd "$CLAUDE_PROJECT_DIR"
+
+changed=false
+while IFS= read -r line; do
+  case "${line:3}" in
+    src/* | tests/*) changed=true ;;
+  esac
+# `git status --porcelain` rather than `git diff HEAD` + `git ls-files
+# --others`: the latter pair misses staged-but-uncommitted changes on a
+# brand-new repo with no commits yet (right after copier's own `git init` +
+# `git add .`) — `git diff HEAD` errors out with no HEAD to compare against,
+# and `git ls-files --others` only ever lists untracked files, not staged
+# ones. `git status --porcelain` covers staged, unstaged, and untracked
+# alike, with or without a HEAD to compare against.
+done < <(git status --porcelain -- src tests)
+
+$changed || exit 0
+
+reason=""
+
+tests_output="$(just run-tests 2>&1)"
+tests_status=$?
+if [ "$tests_status" -ne 0 ]; then
+  reason="${reason}Tests failed (just run-tests):
+${tests_output}
+
+"
+fi
+{% if use_mypy %}
+typecheck_output="$(just typecheck 2>&1)"
+typecheck_status=$?
+if [ "$typecheck_status" -ne 0 ]; then
+  reason="${reason}Typecheck failed (just typecheck):
+${typecheck_output}"
+fi
+{% endif %}
+if [ -n "$reason" ]; then
+  jq -n --arg reason "$reason" '{decision: "block", reason: $reason}'
+fi
+
+exit 0
