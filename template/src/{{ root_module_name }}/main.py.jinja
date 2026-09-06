@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Settings:
+    """Settings passed down the command group to its subcommands."""
+
     number: int
 
 
@@ -54,6 +56,7 @@ def main(ctx: click.Context, log_level: str):
 @pass_settings
 @click.pass_context
 def main_foo(ctx, settings: Settings, flag_a, flag_b, flag_c, arg_a, arg_b):
+    """Example subcommand exercising options, an environment variable, and arguments."""
     print(f"Settings  : {settings.number}")
     print(f"Flag a    : {flag_a}")
     print(f"Flag b    : {flag_b}")

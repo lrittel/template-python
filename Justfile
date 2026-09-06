@@ -19,7 +19,9 @@ create-test-projects: clean-test-projects
         --data use_mkdocs=true \
         --data use_nix_flake=true \
         --data use_pre_commit=true \
-        --data use_py_click=true
+        --data use_py_click=true \
+        --data use_ruff=true \
+        --data use_mypy=true
 
     # No optional features enabled.
     copier copy . test/minimal-features --trust \
@@ -34,7 +36,9 @@ create-test-projects: clean-test-projects
         --data use_mkdocs=false \
         --data use_nix_flake=false \
         --data use_pre_commit=false \
-        --data use_py_click=false
+        --data use_py_click=false \
+        --data use_ruff=false \
+        --data use_mypy=false
 
     # Newest Python version supported.
     copier copy . test/python-newest --trust \
@@ -49,7 +53,9 @@ create-test-projects: clean-test-projects
         --data use_mkdocs=true \
         --data use_nix_flake=true \
         --data use_pre_commit=true \
-        --data use_py_click=true
+        --data use_py_click=true \
+        --data use_ruff=true \
+        --data use_mypy=true
 
     # Oldest Python version supported.
     copier copy . test/python-oldest --trust \
@@ -64,7 +70,9 @@ create-test-projects: clean-test-projects
         --data use_mkdocs=true \
         --data use_nix_flake=true \
         --data use_pre_commit=true \
-        --data use_py_click=true
+        --data use_py_click=true \
+        --data use_ruff=true \
+        --data use_mypy=true
 
 [group("test")]
 run-test-project-tests:

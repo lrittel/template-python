@@ -3,12 +3,13 @@
 setup:
     uv sync
 
-# Removes generated caches: pytest's (.pytest_cache/) and any stray
+# Removes generated caches: pytest's (.pytest_cache/){% if use_mypy %}, mypy's
+# (.mypy_cache/){% endif %}{% if use_ruff %}, ruff's (.ruff_cache/){% endif %}, and any stray
 # __pycache__/ dirs left under src/tests. `.venv` isn't touched here — remove
 # it yourself (or `rm -rf .venv`) if you want a fully clean slate.
 [group('setup')]
 clean:
-    rm -rf .pytest_cache
+    rm -rf .pytest_cache{% if use_mypy %} .mypy_cache{% endif %}{% if use_ruff %} .ruff_cache{% endif %}
     find src tests -type d -name __pycache__ -exec rm -rf {} +
 
 {% if use_mkdocs -%}
@@ -61,7 +62,20 @@ format:
 format-check:
     uv run black --workers 1 --check .
     uv run isort --check .
+{% if use_ruff %}
+# Lints with ruff (currently docstring-presence only; see [tool.ruff] in pyproject.toml).
+[group('checks')]
+lint:
+    uv run ruff check src tests
 
+{% endif -%}
+{% if use_mypy %}
+# Type-checks with mypy.
+[group('checks')]
+typecheck:
+    uv run mypy src tests
+
+{% endif -%}
 # Run the pre-commit hook manually.
 [group('ci')]
 run-pre-commit:
