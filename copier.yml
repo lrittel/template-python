@@ -76,6 +76,18 @@ use_py_click:
   help: Do you want to generate a CLI using Click?
   default: true
 
+use_ruff:
+  type: bool
+  help: >-
+    Do you want to lint for missing docstrings with ruff (presence only, not
+    content/style)?
+  default: true
+
+use_mypy:
+  type: bool
+  help: Do you want to type-check with mypy?
+  default: true
+
 min_python_version:
   type: str
   help: What is the minimum Python version you want to support?

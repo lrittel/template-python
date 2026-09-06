@@ -65,6 +65,14 @@ repos:
         entry: uv run isort
         language: system
         types: [python]
+{%- if use_ruff %}
+
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check
+        language: system
+        types: [python]
+{%- endif %}
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.8.3

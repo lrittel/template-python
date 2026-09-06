@@ -26,6 +26,12 @@ dev = [
 {%- if use_pre_commit %}
     "pre-commit>=4.2.0,<5.0.0",
 {%- endif %}
+{%- if use_ruff %}
+    "ruff>=0.12.0,<0.13.0",
+{%- endif %}
+{%- if use_mypy %}
+    "mypy>=2.3.0,<3.0.0",
+{%- endif %}
 ]
 {%- if use_mkdocs %}
 docs = [
@@ -78,7 +84,30 @@ profile = "black"
 src_paths = ["src", "tests"]
 skip_gitignore = true
 
+{% if use_ruff %}
+[tool.ruff]
+# Linting only — black/isort keep owning formatting.
+src = ["src", "tests"]
 
+[tool.ruff.lint]
+# Docstring *presence* only (module/class/function/method missing-docstring
+# checks). Content rules (param/return docs, D2xx/D4xx wording/formatting
+# checks) are deliberately left off.
+select = ["D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+# Plain PEP 257 one-liners, not Google/NumPy sectioned docstrings.
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+# Test functions aren't required to carry docstrings — the test name is the
+# documentation.
+"tests/**" = ["D"]
+{% endif -%}
+{% if use_mypy %}
+[tool.mypy]
+ignore_missing_imports = true
+{% endif -%}
 {%- if use_commitizen %}
 [tool.commitizen]
 name = "cz_conventional_commits"
