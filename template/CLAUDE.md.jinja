@@ -1,0 +1,36 @@
+# {{ project_name }}
+{% if description %}
+{{ description }}
+{% endif %}
+`src`-layout Python project (`>={{ min_python_version }}`), managed with uv.
+
+## Layout
+
+- `src/{{ root_module_name }}/` — application code; `main.py` is the entry point{% if use_py_click %} (a Click CLI){% endif %}
+- `tests/` — pytest, mirrors `src/{{ root_module_name }}/`
+
+## Commands
+{% if use_just %}
+{%- set recipes = ["setup (installs dependencies)", "run-app", "run-tests", "watch-tests", "format/format-check (black + isort)"] %}
+{%- if use_ruff %}{% set recipes = recipes + ["lint (ruff — see below)"] %}{% endif %}
+{%- if use_mypy %}{% set recipes = recipes + ["typecheck (mypy)"] %}{% endif %}
+{%- if use_mkdocs %}{% set recipes = recipes + ["build-docs/serve-docs"] %}{% endif %}
+{%- if use_pre_commit %}{% set recipes = recipes + ["run-pre-commit/run-pre-commit-all"] %}{% endif %}
+{%- if use_github_workflow %}{% set recipes = recipes + ["run-workflows (runs the GitHub Actions workflows locally via act)"] %}{% endif %}
+{%- set recipes = recipes + ["clean"] %}
+Run via `just <recipe>` from the repo root (see `Justfile` for the full list): {{ recipes | join(", ") }}.
+{% else %}
+No task runner is set up — use `uv run` directly: `uv run pytest`, `uv run black .`, `uv run isort .`{% if use_ruff %}, `uv run ruff check src tests`{% endif %}{% if use_mypy %}, `uv run mypy src tests`{% endif %}.
+{% endif %}
+{% if use_ruff %}
+Every module, class, and function/method needs a one-line docstring (ruff's `D100`–`D107` enforce presence, not content — no required sections). Test functions are exempt (see `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml`).
+{% endif %}
+{%- if use_claude_code_hooks %}
+
+## Claude Code hooks
+
+`.claude/hooks/` auto-formats a file right after it's edited, blocks `git commit` until the full test{% if use_mypy %}+typecheck{% endif %} suite passes, and gives a fast per-turn signal on `Stop` (scoped to `src`/`tests` changes only, for speed). See `.claude/settings.json` for how they're wired up.
+{%- endif %}
+{#
+vim: syntax=markdown.jinja
+#}
