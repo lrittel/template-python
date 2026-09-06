@@ -1,4 +1,17 @@
-{%- if use_mkdocs -%}
+# Installs dependencies.
+[group('setup')]
+setup:
+    uv sync
+
+# Removes generated caches: pytest's (.pytest_cache/) and any stray
+# __pycache__/ dirs left under src/tests. `.venv` isn't touched here — remove
+# it yourself (or `rm -rf .venv`) if you want a fully clean slate.
+[group('setup')]
+clean:
+    rm -rf .pytest_cache
+    find src tests -type d -name __pycache__ -exec rm -rf {} +
+
+{% if use_mkdocs -%}
 # Build the documentation.
 [group('docs')]
 build-docs:
@@ -8,7 +21,7 @@ build-docs:
 [group('docs')]
 serve-docs:
     uv run mkdocs serve --watch ./src
-
+{% endif %}
 # Runs the main application with the given arguments.
 [group('app')]
 [positional-arguments]
@@ -33,7 +46,21 @@ watch-tests *PYTEST_FLAGS:
         fi
         sleep 0.5
     done
-{%- endif %}
+
+# Formats Python source with black and isort.
+[group('format')]
+format:
+    # --workers 1: black's default process pool needs a multiprocessing
+    # socket that sandboxed environments (e.g. Claude Code) may block;
+    # single-worker mode avoids relying on it.
+    uv run black --workers 1 .
+    uv run isort .
+
+# Checks Python formatting without modifying files.
+[group('format')]
+format-check:
+    uv run black --workers 1 --check .
+    uv run isort --check .
 
 # Run the pre-commit hook manually.
 [group('ci')]
@@ -44,8 +71,7 @@ run-pre-commit:
 [group('ci')]
 run-pre-commit-all:
     uv run pre-commit run --all
-
-{%- if use_github_workflow +%}
+{% if use_github_workflow +%}
 # Run the GitHub Actions workflows locally.
 [group('ci')]
 run-workflows:
